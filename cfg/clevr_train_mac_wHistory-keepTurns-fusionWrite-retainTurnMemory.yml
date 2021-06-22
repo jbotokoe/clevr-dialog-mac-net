@@ -23,7 +23,6 @@ TRAIN:
     RETAIN_TURN_MEMORY: True
     FUSION_WRITE_GATE: True
 DATASET:
-    DATA_DIR: '/home/mshah1/workhorse3/clevr-dialog/macnet-data/data/wHistory-keepTurns'
-
+    DATA_DIR: 'data/wHistory-keepTurns'
 
 
