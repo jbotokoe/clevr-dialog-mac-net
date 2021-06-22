@@ -22,7 +22,7 @@ TRAIN:
     GATE_CONTROL_ATTN: True
     RETAIN_TURN_MEMORY: True
 DATASET:
-    DATA_DIR: '/home/mshah1/workhorse3/clevr-dialog/macnet-data/data/wHistory-keepTurns-concatCtx'
+    DATA_DIR: 'data/wHistory-keepTurns-concatCtx'
 
 
 
