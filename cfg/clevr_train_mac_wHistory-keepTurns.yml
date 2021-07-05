@@ -23,7 +23,7 @@ TRAIN:
     REENCODE_CONTROL: False
     GATE_CONTROL_ATTN: True
 DATASET:
-    DATA_DIR: '/home/mshah1/workhorse3/clevr-dialog/macnet-data/data/wHistory-keepTurns'
+    DATA_DIR: '/data/wHistory-keepTurns'
 
 
 
