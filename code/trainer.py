@@ -42,7 +42,7 @@ def load_model(cpfile, cfg, return_attn_maps=False):
     if cfg.CUDA:
         cpdata = torch.load(cpfile)
     else:
-    cpdata = torch.load(cpfile, map_location=torch.device('cpu'))
+        cpdata = torch.load(cpfile, map_location=torch.device('cpu')) # fix indent
     if return_attn_maps:        
         cfg.EVAL.RETURN_ATTENTION_MAPS = return_attn_maps
         print(cfg.EVAL.RETURN_ATTENTION_MAPS)
