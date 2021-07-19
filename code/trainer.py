@@ -38,6 +38,25 @@ class Logger(object):
         #you might want to specify some extra behavior here.
         pass
 
+def load_model(cpfile, cfg, return_attn_maps=False):
+    cpdata = torch.load(cpfile, map_location=torch.device('cpu'))
+    
+    if return_attn_maps:        
+        cfg.EVAL.RETURN_ATTENTION_MAPS = return_attn_maps
+        print(cfg.EVAL.RETURN_ATTENTION_MAPS)
+
+    vocab = load_vocab(cfg)
+    
+    model = mac.MACNetwork(cfg, cfg.TRAIN.MAX_STEPS, vocab)    
+    model.load_state_dict(cpdata['model'])
+   
+    if cfg.CUDA:
+        model = model.cuda()
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.TRAIN.LEARNING_RATE)
+    if cpdata['optim'] is not None:
+        optimizer.load_state_dict(cpdata['optim'])        
+    return model, vocab, optimizer
 
 class Trainer():
     def __init__(self, log_dir, cfg, cp_path=None, load_state_dict_only=False, tune_new_modules_only=False):
@@ -93,9 +112,15 @@ class Trainer():
                                             shuffle=False, num_workers=cfg.WORKERS, collate_fn=collate_fn)
 
         # load model
+        if cp_path is not None:
+            for root, dirs, files in os.walk(cp_path): # cp_path is a dir, hence find pth file
+                for f in [i for i in files if not (i.startswith("."))]: # ignore hidden files (e.g. on MacOS .DS_Store)
+                    cp_path = os.path.join(root, f)
+            last_epoch = int(cp_path.split('.')[0][-6:]) # retrieve epoch number
+            self.epoch_restart = last_epoch + 1 # increment by one as last_epoch was successful
         
         if cp_path is not None and not load_state_dict_only:
-            self.model, self.vocab, self.optimizer = load_model(cp_path)            
+            self.model, self.vocab, self.optimizer = load_model(cp_path, self.cfg)            
             self.model_ema = deepcopy(self.model)         
         else:
             self.vocab = load_vocab(cfg)
@@ -240,7 +265,10 @@ class Trainer():
     def train(self):
         cfg = self.cfg
         print("Start Training")
-        for epoch in range(self.max_epochs):
+        starting_epoch = 0
+        if self.epoch_restart:
+            starting_epoch = self.epoch_restart
+        for epoch in range(starting_epoch, self.max_epochs):
             dict = self.train_epoch(epoch)
             # self.reduce_lr()
             val_acc = self.log_results(epoch, dict)
