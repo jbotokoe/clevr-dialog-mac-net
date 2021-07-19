@@ -39,6 +39,9 @@ class Logger(object):
         pass
 
 def load_model(cpfile, cfg, return_attn_maps=False):
+    if cfg.CUDA:
+        cpdata = torch.load(cpfile)
+    else:
     cpdata = torch.load(cpfile, map_location=torch.device('cpu'))
     
     if return_attn_maps:        
